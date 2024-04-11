@@ -1,0 +1,18 @@
+.idea/
+.DS_Store
+
+__pycache__/
+
+.env
+*/.env
+
+*/dist
+*/.next
+
+*/logs
+
+*/alembic.ini
+
+# Docker Compose
+docker-compose.yaml
+
