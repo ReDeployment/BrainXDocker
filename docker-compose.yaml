@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  postgres:
+    # image: postgres:14.11 
+    image: pgvector/pgvector:pg16
+    container_name: brainx-postgres
+    environment:
+      POSTGRES_USER: "brainx"
+      POSTGRES_PASSWORD: "brainxpwd"
+      POSTGRES_DB: brain_x
+    volumes:
+      - ./docker-data/postgres:/var/lib/postgresql/data
+    ports:
+      - "${DATABSE_PORT}:5432"
+    networks:
+      - brainx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brainx -d brain_x"]
+      interval: 5s
+      retries: 5
+
+
+  backend:
+    image: ${DOCKER_IMAGE_BACKEND_NAME}:${DOCKER_IMAGE_VERSION}
+    container_name: brainx-backend
+    ports:
+      - "${BACKEND_PORT}:8000"  # 假设 FastAPI 服务运行在 8000 端口
+    volumes:
+      - ./backend/.env:/app/.env
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./docker-data/backend/logs:/app/logs
+    networks:
+      - brainx-network
+    depends_on:
+      # redis:
+      #   condition: service_healthy
+      postgres:
+        condition: service_healthy
+      
+  frontend:
+    image: ${DOCKER_IMAGE_FRONTEND_NAME}:${DOCKER_IMAGE_VERSION}
+    container_name: brainx-frontend
+    ports:
+      - "${FRONTEND_PORT}:3000"  # 假设 Next.js 服务运行在 3000 端口
+    volumes:
+      - ./frontend/.env:/app/.env
+    networks:
+      - brainx-network
+
+  gateway:
+    image: ${DOCKER_IMAGE_GATEWAY_NAME}:${DOCKER_IMAGE_VERSION}
+    container_name: brainx-gateway
+    volumes:
+      - ./logs/nginx/backend:/var/log/nginx/backend
+      - ./logs/nginx/frontend:/var/log/nginx/frontend
+      - ./nginx/services:/etc/nginx/sites-enabled/
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - '${GATEWAY_PORT}:8080'
+    # environment:
+    #   - NEXTJS_CONTAINER_IP=nextjs-app # supplying environment vars for convert-nginx.sh file.
+    command: ['sh', '/etc/nginx/convert-nginx.sh']
+
+networks:
+  brainx-network:
+    driver: bridge
+
+name: brainx
