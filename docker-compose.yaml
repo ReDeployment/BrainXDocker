@@ -20,7 +20,7 @@ services:
       interval: 5s
       retries: 5
 
-
+  # Backend
   backend:
     image: ${DOCKER_IMAGE_BACKEND_NAME}:${DOCKER_IMAGE_VERSION}
     container_name: brainx-backend
@@ -31,6 +31,7 @@ services:
       - ./backend/alembic:/app/alembic
       - ./backend/alembic.ini:/app/alembic.ini
       - ./docker-data/backend/logs:/app/logs
+      - ${CACHE_FOLDER}:/root/.cache
     networks:
       - brainx-network
     depends_on:
@@ -38,7 +39,8 @@ services:
       #   condition: service_healthy
       postgres:
         condition: service_healthy
-      
+
+  # Frontend   
   frontend:
     image: ${DOCKER_IMAGE_FRONTEND_NAME}:${DOCKER_IMAGE_VERSION}
     container_name: brainx-frontend
@@ -49,6 +51,33 @@ services:
     networks:
       - brainx-network
 
+  # Ollama Server
+  ollama1:
+    image: ollama/ollama
+    container_name: ollama1
+    mem_limit: 10g
+    ports:
+      - "${OLLAMA_PORT_1}:11434"
+    volumes:
+      - ${OLLAMA_1_DATA}:/root/.ollama
+      - ${CACHE_FOLDER}:/root/.cache
+    networks:
+      - brainx-network
+
+  ollama2:
+    image: ollama/ollama
+    container_name: ollama2
+    ports:
+      - "${OLLAMA_PORT_2}:11434"
+    volumes:
+      - ${OLLAMA_2_DATA}:/root/.ollama
+      - ${CACHE_FOLDER}:/root/.cache
+    networks:
+      - brainx-network
+    depends_on:
+      - ollama1
+      
+  # Gateway
   gateway:
     image: ${DOCKER_IMAGE_GATEWAY_NAME}:${DOCKER_IMAGE_VERSION}
     container_name: brainx-gateway
