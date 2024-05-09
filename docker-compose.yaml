@@ -30,6 +30,7 @@ services:
       - ./backend/.env:/app/.env
       - ./backend/alembic:/app/alembic
       - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/Makefile:/app/Makefile
       - ./docker-data/backend/logs:/app/logs
       - ${CACHE_FOLDER}:/root/.cache
       - ${MODEL_FOLDER}:/root/brainx/model
