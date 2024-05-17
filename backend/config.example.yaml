@@ -6,7 +6,7 @@ server:
   max_bytes: 10485760
   cors_origins:
     - "*"
-  worker_count: 5
+  worker_count: 1
   environment: "local"
   server_render: False
 
