@@ -1,4 +1,4 @@
-version: '3'
+# version: '3'
 
 services:
   postgres:
@@ -6,9 +6,9 @@ services:
     image: pgvector/pgvector:pg16
     container_name: brainx-postgres
     environment:
-      POSTGRES_USER: "brainx"
-      POSTGRES_PASSWORD: "brainxpwd"
-      POSTGRES_DB: brain_x
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./docker-data/postgres:/var/lib/postgresql/data
     ports:
@@ -20,6 +20,25 @@ services:
       interval: 5s
       retries: 5
 
+  minio:
+    image: minio/minio:latest
+    container_name: brainx-oss-minio
+    command: server --address :9001 --console-address ":9090" /mnt/data
+    environment:
+      MINIO_CONFIG_ENV_FILE: ./docker-data/minio/env
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+    volumes:
+      - ./docker-data/minio:/mnt/data
+      - ./docker-data/minio/env:/etc/config.env
+    ports:
+      # api port
+      - "${MINIO_API_PORT}:9001"
+      # console port
+      - "${MINIO_CONSOLE_PORT}:9090"
+    networks:
+      - brainx-network
+
   # Backend
   backend:
     image: ${DOCKER_IMAGE_BACKEND_NAME}:${DOCKER_IMAGE_VERSION}
@@ -27,7 +46,7 @@ services:
     ports:
       - "${BACKEND_PORT}:8000"  # 假设 FastAPI 服务运行在 8000 端口
     volumes:
-      - ./backend/.env:/app/.env
+      - ./backend/config.yaml:/app/config.yaml
       - ./backend/alembic:/app/alembic
       - ./backend/alembic.ini:/app/alembic.ini
       - ./backend/Makefile:/app/Makefile

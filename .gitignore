@@ -6,6 +6,9 @@ __pycache__/
 .env
 */.env
 
+config.yaml
+*/config.yaml
+
 */dist
 */.next
 

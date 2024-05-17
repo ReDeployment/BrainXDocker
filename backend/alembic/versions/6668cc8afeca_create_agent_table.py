@@ -11,7 +11,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from alembic import op
 import sqlalchemy as sa
 
-from app.models.robot_chat.agent import robot_agent_table_name
+from app.models.robot_chat.agent import table_name_robot_agent
 from app.models.base import BaseModel
 
 # revision identifiers, used by Alembic.
@@ -23,7 +23,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        robot_agent_table_name,
+        table_name_robot_agent,
         sa.Column('id', sa.BigInteger(), nullable=False),
         sa.Column('uuid', UUID(as_uuid=True), default=BaseModel.uuid.default.arg, unique=True),
 
@@ -43,5 +43,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table(robot_agent_table_name)
+    op.drop_table(table_name_robot_agent)
 
