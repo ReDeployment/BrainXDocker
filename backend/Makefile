@@ -3,10 +3,13 @@ app-init-db: app-migrate app-seed
 
 
 app-migrate:
-	./dist/server/server --migrate
+	python server.py --database --migrate
+
+app-downgrade-all:
+	python server.py --database --downgrade-all
 
 app-seed:
-	./dist/server/server --seed
+	python server.py --seed
 
 app-run:
 	echo "Running in production mode."
