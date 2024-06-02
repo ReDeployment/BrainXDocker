@@ -44,6 +44,12 @@ baidu_qianfan:
   secret_key: "YOUR_SECRET_KEY"
   request_timeout: 30
 
+kimi:
+  llm_name: "moonshot-v1-8k"
+  api_key: "YOUR_API_KEY"
+  api_base: "https://api.moonshot.cn/v1"
+  request_timeout: 30
+  
 ollama:
   qa_llm_model_engine: "qa_llm_model_engine"
   qa_llm_model_name: "qa_llm_model"
