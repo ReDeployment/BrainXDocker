@@ -25,23 +25,25 @@ def upgrade() -> None:
     op.create_table(
         table_name_robot_agent,
         sa.Column('id', sa.BigInteger(), nullable=False),
-        sa.Column('uuid', UUID(as_uuid=True), default=BaseModel.uuid.default.arg, unique=True),
+        sa.Column('uuid', UUID(as_uuid=True), default=BaseModel.uuid.default.arg, index=True, unique=True),
 
-        sa.Column('customer_id', sa.String(length=255), nullable=True),
+        sa.Column('user_id', sa.BigInteger(), nullable=True),
+        sa.Column('parent_id', sa.BigInteger(), nullable=True),
+        sa.Column('llm_uuid', sa.String(length=255), nullable=True, index=True),
         sa.Column('name', sa.String(), nullable=True),
-        sa.Column('description', sa.String(), nullable=True),
+        sa.Column('description', sa.Text(), nullable=True),
         sa.Column('persona_prompt', sa.Text(), nullable=True),
         sa.Column('status', sa.SmallInteger(), nullable=True),
+        sa.Column('type', sa.SmallInteger(), nullable=True),
         sa.Column('avatar_url', sa.String(), nullable=True),
 
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), default=BaseModel.created_at.default.arg, nullable=False),
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), default=BaseModel.updated_at.default.arg,
                   onupdate=BaseModel.updated_at.default.arg, nullable=False),
-        sa.Column('is_deleted', sa.Boolean(), default=BaseModel.is_deleted.default.arg),
+        sa.Column('deleted_at', sa.TIMESTAMP(timezone=True), default=None, nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
 
 
 def downgrade() -> None:
     op.drop_table(table_name_robot_agent)
-

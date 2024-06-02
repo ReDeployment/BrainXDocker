@@ -25,9 +25,9 @@ def upgrade() -> None:
     op.create_table(
         table_name_media_resource,
         sa.Column('id', sa.BigInteger(), nullable=False),
-        sa.Column('uuid', UUID(as_uuid=True), default=BaseModel.uuid.default.arg, unique=True),
+        sa.Column('uuid', UUID(as_uuid=True), default=BaseModel.uuid.default.arg, index=True, unique=True),
 
-        sa.Column('customer_id', sa.Integer(), comment='客户Id'),
+        sa.Column('user_id', sa.Integer(), comment='用户Id'),
         sa.Column('filename', sa.String(), comment='名称'),
         sa.Column('size', sa.Integer(), comment='尺寸'),
         sa.Column('width', sa.Integer(), comment='宽度'),
@@ -42,10 +42,10 @@ def upgrade() -> None:
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), default=BaseModel.created_at.default.arg, nullable=False),
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), default=BaseModel.updated_at.default.arg,
                   onupdate=BaseModel.updated_at.default.arg, nullable=False),
-        sa.Column('is_deleted', sa.Boolean(), default=BaseModel.is_deleted.default.arg),
+        sa.Column('deleted_at', sa.Boolean(), default=None, nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
 
+
 def downgrade() -> None:
     op.drop_table(table_name_media_resource)
-
