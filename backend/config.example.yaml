@@ -6,7 +6,7 @@ server:
   max_bytes: 10485760
   cors_origins:
     - "*"
-  worker_count: 1
+  worker_count: 5
   environment: "local"
   server_render: False
 
@@ -18,6 +18,10 @@ api:
 database:
   url: "postgresql+asyncpg://user:pass@127.0.0.1:54321/brain_x"
   table_name_vector_store: "embeddings"
+
+cache:
+  redis:
+    url: redis://mypassword@localhost:6379/0
 
 models:
   qa_embedding_model_name: "shibing624/text2vec-base-chinese"
@@ -49,10 +53,8 @@ kimi:
   api_key: "YOUR_API_KEY"
   api_base: "https://api.moonshot.cn/v1"
   request_timeout: 30
-  
+
 ollama:
-  qa_llm_model_engine: "qa_llm_model_engine"
-  qa_llm_model_name: "qa_llm_model"
   url: "http://localhost:11434"
 
 polygon:
@@ -63,27 +65,30 @@ sentry:
   environment: "local"
   release: "1.0"
 
-minio:
-  endpoint: "https://minio.example.com"
-  access_key: "YOUR_ACCESS_KEY"
-  secret_key: "YOUR_SECRET_KEY"
-  use_ssl: True
-
-oss:
-  enable: True
+storage:
+  driver: "minio"
+  local_storage:
+    storage_path: "./storage"
   minio:
     endpoint: "https://minio.example.com"
     access_key: "YOUR_ACCESS_KEY"
     secret_key: "YOUR_SECRET_KEY"
     use_ssl: True
-
-media_resource:
-  local_storage:
-  oss:
-    enable: True
-    minio:
-      endpoint: "127.0.0.1:9001"
-      access_key: "YOUR_ACCESS_KEY"
-      secret_key: "YOUR_SECRET_KEY"
-      use_ssl: False
-      region: 'AsiaShanghai'
+    region: 'AsiaShanghai'
+  aliyun:
+    endpoint: "oss-cn-beijing.aliyuncs.com"
+    access_key: "YOUR_ACCESS_KEY"
+    secret_key: "YOUR_SECRET_KEY"
+    bucket_name: "BUCKET_NAME"
+  azure:
+    account_name: 'ACCOUNT_NAME'
+    account_key: 'ACCOUNT_KEY'
+    container_name: 'CONTAINER_NAME'
+    bucket_name: 'BUCKET_NAME'
+  google:
+    bucket_name: 'BUCKET_NAME'
+  s3:
+    endpoint: 'ENDPOINT'
+    access_key: 'ACCESS_KEY'
+    secret_key: 'SECRET_KEY'
+    bucket_name: 'BUCKET_NAME'
