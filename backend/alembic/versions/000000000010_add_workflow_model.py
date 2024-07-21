@@ -13,7 +13,7 @@ import sqlalchemy as sa
 from sqlalchemy import UUID
 
 from app.models.originaztion.user import table_name_user
-from app.models.workflow import table_name_workflow
+from app.models.workflow.workflow import table_name_workflow
 
 # revision identifiers, used by Alembic.
 revision: str = '000000000010'
@@ -26,9 +26,11 @@ def upgrade() -> None:
     op.create_table(
         table_name_workflow,
         sa.Column('id', sa.BigInteger(), nullable=False),
-        sa.Column('uuid', UUID(as_uuid=True),  index=True, unique=True),
+        sa.Column('uuid', UUID(as_uuid=True), nullable=False, index=True, unique=True),
 
         sa.Column('tenant_uuid', sa.UUID(), nullable=True),
+        sa.Column('created_user_by', UUID(as_uuid=True), nullable=False),
+        sa.Column('updated_user_by', UUID(as_uuid=True), nullable=True),
         sa.Column('parent_uuid', sa.UUID(), nullable=True),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('tag', sa.String(), nullable=False),

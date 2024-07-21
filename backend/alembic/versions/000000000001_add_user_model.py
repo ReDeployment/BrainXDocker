@@ -1,4 +1,4 @@
-"""add user model
+"""add tenant model
 
 Revision ID: 000000000001
 Revises: 38460b361a35
@@ -26,8 +26,9 @@ def upgrade() -> None:
     op.create_table(
         table_name_user,
         sa.Column('id', sa.BigInteger(), nullable=False),
-        sa.Column('uuid', UUID(as_uuid=True),  index=True, unique=True),
+        sa.Column('uuid', UUID(as_uuid=True), nullable=False, index=True, unique=True),
 
+        sa.Column('tenant_owner_uuid', sa.UUID(), nullable=True, unique=True),
         sa.Column('account', sa.String(), nullable=True),
         sa.Column('name', sa.String(), nullable=True),
         sa.Column('nick_name', sa.String(), nullable=True),
