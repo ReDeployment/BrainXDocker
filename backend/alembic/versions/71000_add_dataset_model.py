@@ -1,7 +1,7 @@
-"""Add Dataset model
+"""Add Dataset models
 
-Revision ID: 000000000030
-Revises: 000000000020
+Revision ID: 71000
+Revises: 60000
 Create Date: 2024-07-15 21:29:10.358912
 
 """
@@ -12,11 +12,13 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import UUID
 
+from app import settings
+from app.models import Dataset, User, Tenant
 from app.models.base import table_name_dataset, table_name_tenant, table_name_user, table_name_dataset_segment_rule
 
 # revision identifiers, used by Alembic.
-revision: str = '000000000030'
-down_revision: Union[str, None] = '000000000020'
+revision: str = '71000'
+down_revision: Union[str, None] = '60000'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -24,12 +26,12 @@ depends_on: Union[str, Sequence[str], None] = None
 def create_dataset_table() -> None:
     op.create_table(
         table_name_dataset,
-        sa.Column('id', sa.BigInteger(), nullable=False),
+        # sa.Column('id', sa.BigInteger(), nullable=False, autoincrement=True),
         sa.Column('uuid', UUID(as_uuid=True), nullable=False, index=True, unique=True),
 
-        sa.Column('tenant_uuid', UUID(as_uuid=True), nullable=False),
-        sa.Column('created_user_by', UUID(as_uuid=True), nullable=False),
-        sa.Column('updated_user_by', UUID(as_uuid=True), nullable=True),
+        sa.Column('tenant_uuid', UUID(as_uuid=True), nullable=False, index=True),
+        sa.Column('created_user_by', UUID(as_uuid=True), nullable=False, index=True),
+        sa.Column('updated_user_by', UUID(as_uuid=True), nullable=True, index=True),
 
         sa.Column('name', sa.String(), nullable=True),
         sa.Column('description', sa.String(), nullable=True),
@@ -47,17 +49,18 @@ def create_dataset_table() -> None:
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), default=datetime.UTC, nullable=False),
         sa.Column('deleted_at', sa.TIMESTAMP(timezone=True), default=None, nullable=True),
 
-        sa.ForeignKeyConstraint(['tenant_uuid'], [table_name_tenant + '.uuid'], ),
-        sa.ForeignKeyConstraint(['created_user_by'], [table_name_user + '.uuid'], ),
-        sa.ForeignKeyConstraint(['updated_user_by'], [table_name_user + '.uuid'], ),
-        sa.PrimaryKeyConstraint('id'),
+        sa.ForeignKeyConstraint(['tenant_uuid'], [Tenant.__table__.fullname + '.uuid'], ),
+        sa.ForeignKeyConstraint(['created_user_by'], [User.__table__.fullname + '.uuid'], ),
+        sa.ForeignKeyConstraint(['updated_user_by'], [User.__table__.fullname + '.uuid'], ),
+        sa.PrimaryKeyConstraint('uuid'),
+        schema=settings.database.db_schema
     )
 
 
 def create_dataset_segment_rule_table() -> None:
     op.create_table(
         table_name_dataset_segment_rule,
-        sa.Column('id', sa.BigInteger(), nullable=False),
+        # sa.Column('id', sa.BigInteger(), nullable=False, autoincrement=True),
         sa.Column('uuid', UUID(as_uuid=True), nullable=False, index=True, unique=True),
 
         sa.Column('dataset_uuid', UUID(as_uuid=True), nullable=False),
@@ -67,11 +70,12 @@ def create_dataset_segment_rule_table() -> None:
 
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), default=datetime.UTC, nullable=False),
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), default=datetime.UTC, nullable=False),
-        sa.Column('deleted_at', sa.Boolean(), default=None, nullable=True),
+        sa.Column('deleted_at', sa.TIMESTAMP(timezone=True), default=None, nullable=True),
 
-        sa.ForeignKeyConstraint(['dataset_uuid'], [table_name_dataset + '.uuid'], ),
+        sa.ForeignKeyConstraint(['dataset_uuid'], [Dataset.__table__.fullname + '.uuid'], ),
 
-        sa.PrimaryKeyConstraint('id'),
+        sa.PrimaryKeyConstraint('uuid'),
+        schema=settings.database.db_schema
     )
 
 
@@ -81,5 +85,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table(table_name_dataset_segment_rule)
-    op.drop_table(table_name_dataset)
+    op.drop_table(table_name_dataset_segment_rule, schema=settings.database.db_schema)
+    op.drop_table(table_name_dataset, schema=settings.database.db_schema)

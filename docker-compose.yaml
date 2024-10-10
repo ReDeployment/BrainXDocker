@@ -1,5 +1,3 @@
-# version: '3'
-
 services:
   postgres:
     # image: postgres:14.11 
@@ -52,18 +50,17 @@ services:
     networks:
       - brainx-network
 
-  # Backend
-  backend:
+  # 定义共享配置的锚点
+  backend-base: &backend-base
+    container_name: brainx-backend-base
     image: ${DOCKER_IMAGE_BACKEND_NAME}:${DOCKER_IMAGE_VERSION}
-    container_name: brainx-backend
-    ports:
-      - "${BACKEND_PORT}:8000"  # 假设 FastAPI 服务运行在 8000 端口
     volumes:
       - ./backend/config.yaml:/app/config.yaml
       - ./backend/alembic:/app/alembic
       - ./backend/alembic.ini:/app/alembic.ini
       - ./backend/Makefile:/app/Makefile
       - ./docker-data/backend/logs:/app/logs
+      - ./docker-data/backend/storage/public/static:/app/storage/public/static
       - ${CACHE_FOLDER}:/root/.cache
       - ${MODEL_FOLDER}:/root/brainx/model
     networks:
@@ -73,6 +70,25 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+
+  # Backend 服务
+  backend:
+    <<: *backend-base
+    container_name: brainx-backend
+    ports:
+      - "${BACKEND_PORT}:8000"  # FastAPI 映射到主机端口
+    # command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["make", "-f", "/app/Makefile","-C", "/app", "app-init"]
+    
+
+  # Celery 服务
+  celery:
+    <<: *backend-base
+    container_name: brainx-celery
+    # command: ["celery", "-A", "app.service.task.celery_app", "worker", "--loglevel=info", "-Q", "rag_queue", "-P", "eventlet"]
+    command: ["poetry", "run", "celery", "-A", "app.service.task.celery_app", "worker", "--loglevel=info", "-Q", "rag_queue", "-P", "eventlet"]
+    ports: []  # 确保不映射端口
+
 
   # Frontend   
   frontend:
@@ -111,22 +127,22 @@ services:
     depends_on:
       - ollama1
       
-  # Gateway
-  gateway:
-    image: ${DOCKER_IMAGE_GATEWAY_NAME}:${DOCKER_IMAGE_VERSION}
-    container_name: brainx-gateway
-    volumes:
-      - ./logs/nginx/backend:/var/log/nginx/backend
-      - ./logs/nginx/frontend:/var/log/nginx/frontend
-      - ./nginx/services:/etc/nginx/sites-enabled/
-    depends_on:
-      - backend
-      - frontend
-    ports:
-      - '${GATEWAY_PORT}:8080'
-    # environment:
-    #   - NEXTJS_CONTAINER_IP=nextjs-app # supplying environment vars for convert-nginx.sh file.
-    # command: ['sh', '/etc/nginx/convert-nginx.sh']
+  # # Gateway
+  # gateway:
+  #   image: ${DOCKER_IMAGE_GATEWAY_NAME}:${DOCKER_IMAGE_VERSION}
+  #   container_name: brainx-gateway
+  #   volumes:
+  #     - ./logs/nginx/backend:/var/log/nginx/backend
+  #     - ./logs/nginx/frontend:/var/log/nginx/frontend
+  #     - ./nginx/services:/etc/nginx/sites-enabled/
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   ports:
+  #     - '${GATEWAY_PORT}:8080'
+  #   # environment:
+  #   #   - NEXTJS_CONTAINER_IP=nextjs-app # supplying environment vars for convert-nginx.sh file.
+  #   # command: ['sh', '/etc/nginx/convert-nginx.sh']
 
 networks:
   brainx-network:

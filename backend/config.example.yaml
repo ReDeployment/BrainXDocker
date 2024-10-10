@@ -1,6 +1,7 @@
 server:
   version: "0.0.1"
   project_name: "brainx"
+  project_type: "standalone"
   host: "0.0.0.0"
   port: 8000
   max_bytes: 10485760
@@ -20,21 +21,70 @@ api:
   request_timeout: 60
 
 openapi:
-  access_key: "YOUR_ACCESS_KEY"
-  secret_key: "YOUR_SECRET_KEY"
+  platforms:
+    token_secret_key: "xxxxxxxxxxxxxxxxxxxx"
+    # 访问BrainX OpenAPI的restful 配置
+    power_x:
+      access_key: "key_power_x"
+      secret_key: "987654321"
+
+  providers:
+    # 访问PowerX OpenAPI的restful 配置
+    power_x:
+        base_url: "http://127.0.0.1:8888/openapi/v1"
+        access_key: 'xxxxxxxxxxxx'
+        secret_key: 'xxxxxxxxxxxx'
 
 database:
-  url: "postgresql+asyncpg://tenant:pass@127.0.0.1:54321/brain_x"
+  async_url: "postgresql+asyncpg://user:pass@127.0.0.1:54321/brain_x"
+  sync_url: "postgresql://user:pass@127.0.0.1:54321/brain_x"
+  db_schema: "public"
   table_name_vector_store: "embeddings"
+  echo_log: False
 
 cache:
   redis:
     url: redis://mypassword@localhost:6379/0
+    use_jsonb: True
+
+schedule:
+  driver: apscheduler
+  job_stores:
+    default:
+      type: sqlalchemy
+      url: postgresql+psycopg2://username:password@localhost/dbname
+  executors:
+    default:
+      type: threadpool
+      max_workers: 10
+  job_defaults:
+    coalesce: false
+    max_instances: 3
+
+task:
+  celery_broker_url: "redis://localhost:6379/0"
+  celery_result_backend: "redis://localhost:6379/0"
+  queue:
+    default:
+    rag_queue: rag_queue
+  broker_use_ssl: False
+  ssl_cert_reqs: ''
+  ssl_ca_certs: ''
+  ssl_cert_file: ''
+  ssl_keyfile: ''
+  result_expires: 3600
+  broker_connection_retry_on_startup: True
 
 models:
   qa_embedding_model_name: "shibing624/text2vec-base-chinese"
   visual_search_model_name: "clip-ViT-L-14"
   visual_query_model_name: "dandelin/vilt-b32-finetuned-vqa"
+
+agent:
+  framework_driver: langchain
+  vdb: pgvector
+  pgvector:
+    url: "postgresql://user:pass@127.0.0.1:54321/brain_x"
 
 log:
   path: logs
@@ -42,8 +92,12 @@ log:
     - error
   level: info
   keep_days: 30
-  console: true
-  stat: false
+  console: True
+  stat: False
+  exc_info: False
+
+test:
+  db_url: 'postgresql+psycopg2://username:password@localhost/test_db'
 
 openai:
   llm_name: "gpt-3.5-turbo"
@@ -54,12 +108,6 @@ openai:
 baidu_qianfan:
   api_key: "YOUR_API_KEY"
   secret_key: "YOUR_SECRET_KEY"
-  request_timeout: 30
-
-kimi:
-  llm_name: "moonshot-v1-8k"
-  api_key: "YOUR_API_KEY"
-  api_base: "https://api.moonshot.cn/v1"
   request_timeout: 30
 
 ollama:
@@ -75,6 +123,7 @@ sentry:
 
 storage:
   driver: "local"
+  host: "127.0.0.1:8000"
   local_storage:
     storage_path: "./storage"
   minio:
