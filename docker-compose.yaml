@@ -81,13 +81,18 @@ services:
     command: ["make", "-f", "/app/Makefile","-C", "/app", "app-init"]
     
 
-  # Celery 服务
-  celery:
+  celery-rag:
     <<: *backend-base
-    container_name: brainx-celery
-    # command: ["celery", "-A", "app.service.task.celery_app", "worker", "--loglevel=info", "-Q", "rag_queue", "-P", "eventlet"]
-    command: ["poetry", "run", "celery", "-A", "app.service.task.celery_app", "worker", "--loglevel=info", "-Q", "rag_queue", "-P", "eventlet"]
-    ports: []  # 确保不映射端口
+    container_name: brainx-celery-rag
+    command: ["./dist/task/task", "-A", "app.service.task.celery_app",  "--loglevel=info", "-Q", "rag_queue", "-P", "eventlet"]
+    ports: []
+
+  # Celery worker for another queue (e.g., default queue)
+  celery-default:
+    <<: *backend-base
+    container_name: brainx-celery-default
+    command: ["./dist/task/task", "-A", "app.service.task.celery_app", "--loglevel=info", "-P", "eventlet"]
+    ports: []
 
 
   # Frontend   
