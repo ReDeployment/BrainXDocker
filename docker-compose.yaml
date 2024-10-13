@@ -84,14 +84,14 @@ services:
   celery-rag:
     <<: *backend-base
     container_name: brainx-celery-rag
-    command: ["./dist/task/task", "-A", "app.service.task.celery_app",  "--loglevel=info", "-Q", "rag_queue", "-P", "eventlet"]
+    command: ["./dist/task/task", "-A", "app.service.task.celery_worker",  "--loglevel=info", "-Q", "rag_queue", "-P", "pevent"]
     ports: []
 
   # Celery worker for another queue (e.g., default queue)
   celery-default:
     <<: *backend-base
     container_name: brainx-celery-default
-    command: ["./dist/task/task", "-A", "app.service.task.celery_app", "--loglevel=info", "-P", "eventlet"]
+    command: ["./dist/task/task", "-A", "app.service.task.celery_worker", "--loglevel=info", "-P", "pevent"]
     ports: []
 
 
