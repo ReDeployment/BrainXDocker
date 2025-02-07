@@ -1,0 +1,156 @@
+services:
+  postgres:
+    # image: postgres:14.11 
+    image: pgvector/pgvector:pg16
+    container_name: brainx-postgres
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./docker-data/postgres:/var/lib/postgresql/data
+    ports:
+      - "${DATABSE_PORT}:5432"
+    networks:
+      - brainx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brainx -d brain_x"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    container_name: brainx-cache-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - brainx-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: brainx-oss-minio
+    command: server --address :9001 --console-address ":9090" /mnt/data
+    environment:
+      MINIO_CONFIG_ENV_FILE: ./docker-data/minio/env
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+    volumes:
+      - ./docker-data/minio:/mnt/data
+      - ./docker-data/minio/env:/etc/config.env
+    ports:
+      # api port
+      - "${MINIO_API_PORT}:9001"
+      # console port
+      - "${MINIO_CONSOLE_PORT}:9090"
+    networks:
+      - brainx-network
+
+  # 定义共享配置的锚点
+  backend-base: &backend-base
+    container_name: brainx-backend-base
+    image: ${DOCKER_IMAGE_BACKEND_NAME}:${DOCKER_IMAGE_VERSION}
+    volumes:
+      - ./backend/config.yaml:/app/config.yaml
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/Makefile:/app/Makefile
+      - ./docker-data/backend/logs:/app/logs
+      - ./docker-data/backend/storage/public/static:/app/storage/public/static
+      - ${CACHE_FOLDER}:/root/.cache
+      - ${MODEL_FOLDER}:/root/brainx/model
+    networks:
+      - brainx-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  # Backend 服务
+  backend:
+    <<: *backend-base
+    container_name: brainx-backend
+    ports:
+      - "${BACKEND_PORT}:8000"  # FastAPI 映射到主机端口
+    # command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["make", "-f", "/app/Makefile","-C", "/app", "app-init"]
+    
+
+  celery-rag:
+    <<: *backend-base
+    container_name: brainx-celery-rag
+    command: ["./dist/task/task", "-A", "app.service.task.celery_worker",  "--loglevel=info", "-Q", "rag_queue", "-P", "gevent"]
+    ports: []
+
+  # Celery worker for another queue (e.g., default queue)
+  celery-default:
+    <<: *backend-base
+    container_name: brainx-celery-default
+    command: ["./dist/task/task", "-A", "app.service.task.celery_worker", "--loglevel=info", "-P", "gevent"]
+    ports: []
+
+
+  # Frontend   
+  frontend:
+    image: ${DOCKER_IMAGE_FRONTEND_NAME}:${DOCKER_IMAGE_VERSION}
+    container_name: brainx-frontend
+    ports:
+      - "${FRONTEND_PORT}:3000"  # 假设 Next.js 服务运行在 3000 端口
+    volumes:
+      - ./frontend/.env:/app/.env
+    networks:
+      - brainx-network
+
+  # Ollama Server
+  ollama1:
+    image: ollama/ollama
+    container_name: ollama1
+    mem_limit: 10g
+    ports:
+      - "${OLLAMA_PORT_1}:11434"
+    volumes:
+      - ${OLLAMA_1_DATA}:/root/.ollama
+      - ${CACHE_FOLDER}:/root/.cache
+    networks:
+      - brainx-network
+
+  ollama2:
+    image: ollama/ollama
+    container_name: ollama2
+    ports:
+      - "${OLLAMA_PORT_2}:11434"
+    volumes:
+      - ${OLLAMA_2_DATA}:/root/.ollama
+      - ${CACHE_FOLDER}:/root/.cache
+    networks:
+      - brainx-network
+    depends_on:
+      - ollama1
+      
+  # # Gateway
+  # gateway:
+  #   image: ${DOCKER_IMAGE_GATEWAY_NAME}:${DOCKER_IMAGE_VERSION}
+  #   container_name: brainx-gateway
+  #   volumes:
+  #     - ./logs/nginx/backend:/var/log/nginx/backend
+  #     - ./logs/nginx/frontend:/var/log/nginx/frontend
+  #     - ./nginx/services:/etc/nginx/sites-enabled/
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   ports:
+  #     - '${GATEWAY_PORT}:8080'
+  #   # environment:
+  #   #   - NEXTJS_CONTAINER_IP=nextjs-app # supplying environment vars for convert-nginx.sh file.
+  #   # command: ['sh', '/etc/nginx/convert-nginx.sh']
+
+networks:
+  brainx-network:
+    driver: bridge
+
+name: brainx
