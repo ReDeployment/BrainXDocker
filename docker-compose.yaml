@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./docker-data/postgres:/var/lib/postgresql/data
+      - ${POSTGRES_DATA_PATH:-docker-data/postgres}:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT}:5432" # 使用 .env 中的 POSTGRES_PORT
     networks:
@@ -42,7 +42,8 @@ services:
       - "${MINIO_API_PORT}:9000" # MinIO 控制台端口
       - "${MINIO_CONSOLE_PORT}:9001" # MinIO 客户端端口
     volumes:
-      - ./docker-data/minio:/data
+      - ${MINIO_DATA_PATH:-docker-data/minio}:/data
+      # - ${MINIO_CONFIG_PATH:-docker-data/minio/config}:/root/.minio
     command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
     networks:
       - networkX
@@ -61,27 +62,47 @@ services:
       interval: 5s
       retries: 5
 
-  # log:
-  #   image: x-log:${DOCKER_IMAGE_VERSION}
-  #   container_name: x-grafana-loki-promtail
+  grafana:
+    image: x-grafana:${DOCKER_IMAGE_VERSION}
+    container_name: x-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      # - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL:-http://0.0.0.0:3000}
+      # - GF_SERVER_DOMAIN=${GF_SERVER_DOMAIN-0.0.0.0}
+      # - GF_SERVER_HTTP_PORT=${GF_SERVER_HTTP_PORT-3000}
+    ports:
+      - "${GF_SERVER_HTTP_PORT:-3000}:3000"
+    volumes:
+      # - ${GF_CONFIG_PATH:-docker-data/grafana/grafana.ini}:/etc/grafana/grafana.ini
+      - ${GF_DATA_PATH:-docker-data/grafana}:/var/lib/grafana
+    networks:
+      - networkX
+
+  loki:
+    image: x-loki:${DOCKER_IMAGE_VERSION}
+    container_name: x-loki
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    environment:
+      - LOKI_PORT=${LOKI_PORT:-3100}
+    volumes:
+      - ${LOKI_DATA_PATH:-docker-data/loki}:/loki
+      # - ${LOKI_CONFIG_PATH:-docker-data/loki/loki-config.yaml}:/etc/loki/loki-config.yaml
+    networks:
+      - networkX
+
+  # promtail:
+  #   build:
+  #     context: .
+  #     dockerfile: promtail.Dockerfile
   #   ports:
-  #     - "3000:3000" # Grafana
-  #     - "3100:3100" # Loki
-  #     - "9080:9080" # Promtail
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER} # Grafana Admin 用户名
-  #     - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD} # Grafana Admin 密码
-  #     - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL}
-  #     - GF_SERVER_DOMAIN=${GF_SERVER_DOMAIN}
-  #     - GF_SERVER_HTTP_PORT=${GF_SERVER_HTTP_PORT}
-  #     - LOKI_PORT=${LOKI_PORT}
-  #     - PROMTAIL_PORT=${PROMTAIL_PORT}
+  #     - "${PROMTAIL_PORT:-9080}:9080"
   #   volumes:
-  #     - ./config/grafana.ini:/etc/grafana/grafana.ini
-  #     - ./config/loki-config.yaml:/etc/loki/loki-config.yaml
-  #     - ./config/promtail-config.yaml:/etc/promtail/promtail-config.yaml
-  #   networks:
-  #     - networkX
+  #     - ${PROMTAIL_DATA_PATH:-docker-data/promtail/config.yaml}:/etc/promtail/promtail-config.yaml
+  #     - ${LOKI_CONFIG_PATH:-docker-data/loki_config.yaml}:/etc/loki/loki-config.yaml
+  #   environment:
+  #     - PROMTAIL_PORT=${PROMTAIL_PORT:-9080}
 
 networks:
   networkX: # 定义正确的网络

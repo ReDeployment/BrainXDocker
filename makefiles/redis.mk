@@ -16,13 +16,18 @@ endif
 # 定义 Docker 构建命令
 build.redis:
 	@echo "Building Docker image: $(REDIS_IMAGE_NAME) REDIS_VERSION $(REDIS_VERSION)"
-	docker build -t $(REDIS_IMAGE_NAME):$(REDIS_VERSION) $(REDIS_DOCKERFILE_DIR) $(DOCKER_PLATFORM_FLAG)
+	docker build -t $(REDIS_IMAGE_NAME):$(REDIS_VERSION) \
+	$(REDIS_DOCKERFILE_DIR) \
+	$(if $(DOCKER_PLATFORM_FLAG),$(DOCKER_PLATFORM_FLAG),) \
+	$(if $(DOCKER_BUILD_OPTS),$(DOCKER_BUILD_OPTS),)
+
+rerun.grafana: stop.grafana run.grafana
 
 # 运行 Redis 服务
 run.redis:
 	docker run -d --name $(REDIS_IMAGE_NAME) -p $(REDIS_PORT):6379 $(REDIS_IMAGE_NAME):$(REDIS_VERSION)
 
-stop.log:
+stop.redis:
 	docker stop $(REDIS_IMAGE_NAME)
 	docker rm $(REDIS_IMAGE_NAME)
 

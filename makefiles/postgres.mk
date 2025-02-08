@@ -12,6 +12,9 @@ endif
 # 使用 .env 中定义的数据库端口
 POSTGRES_PORT := $(DATABSE_PORT)
 
+POSTGRES_DATA_PATH := $(if $(POSTGRES_DATA_PATH),$(POSTGRES_DATA_PATH),$(PROJECT_DIR)/docker-data/postgres)
+ABS_POSTGRES_DATA_PATH := $(call get_absolute_path,$(POSTGRES_DATA_PATH))
+
 # 打印调试信息（可选）
 # $(info DOCKER_IMAGE_VERSION: $(DOCKER_IMAGE_VERSION))
 # $(info DOCKER_PLATFORM_FLAG: $(DOCKER_PLATFORM_FLAG))
@@ -20,7 +23,12 @@ POSTGRES_PORT := $(DATABSE_PORT)
 # 定义 Docker 构建命令
 build.postgres:
 	@echo "Building Docker image: $(POSTGRES_IMAGE_NAME) version $(POSTGRES_VERSION)"
-	docker build -t $(POSTGRES_IMAGE_NAME):$(POSTGRES_VERSION) $(POSTGRES_DOCKERFILE_DIR) $(DOCKER_PLATFORM_FLAG)
+	docker build -t $(POSTGRES_IMAGE_NAME):$(POSTGRES_VERSION) \
+	$(POSTGRES_DOCKERFILE_DIR) \
+	$(if $(DOCKER_PLATFORM_FLAG),$(DOCKER_PLATFORM_FLAG),) \
+	$(if $(DOCKER_BUILD_OPTS),$(DOCKER_BUILD_OPTS),)
+
+rerun.postgres: stop.postgres run.postgres
 
 # 运行 PostgreSQL 服务，使用动态的数据库端口
 run.postgres:
@@ -30,9 +38,10 @@ run.postgres:
 		-e POSTGRES_USER=$(POSTGRES_USER) \
 		-e POSTGRES_PASSWORD=$(POSTGRES_PASSWORD) \
 		-e POSTGRES_DB=$(POSTGRES_DB) \
+		-v $(ABS_POSTGRES_DATA_PATH):/var/lib/postgresql/data \
 		$(POSTGRES_IMAGE_NAME):$(POSTGRES_VERSION)
 
-stop.log:
+stop.postgres:
 	docker stop $(POSTGRES_IMAGE_NAME)
 	docker rm $(POSTGRES_IMAGE_NAME)
 
