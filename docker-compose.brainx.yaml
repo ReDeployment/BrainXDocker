@@ -1,0 +1,21 @@
+services:
+  rabbitmq:
+    image: x-rabbitmq:${DOCKER_IMAGE_VERSION}
+    container_name: x-rabbitmq
+    ports:
+      - "${RABBITMQ_PORT:-3100}:3100"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-admin}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST:-default}
+    volumes:
+      - ${RABBITMQ_DATA_PATH:-docker-data/rabbitmq}:/rabbitmq
+      # - ${RABBITMQ_CONFIG_PATH:-docker-data/rabbitmq/rabbitmq-config.yaml}:/etc/rabbitmq/rabbitmq-config.yaml
+    networks:
+      - networkX
+
+networks:
+  networkX: # 定义正确的网络
+    driver: bridge # 网络驱动器
+
+name: artisan-cloud-x
