@@ -3,7 +3,8 @@ services:
     image: x-rabbitmq:${DOCKER_IMAGE_VERSION}
     container_name: x-rabbitmq
     ports:
-      - "${RABBITMQ_PORT:-3100}:3100"
+      - "${RABBITMQ_PORT:-5673}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15673}:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-admin}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-admin}

@@ -17,9 +17,6 @@ docker.base.up:
 docker.brainx.up:
 	@docker compose -f $(BRAINX_COMPOSE_FILE) up -d
 
-docker.powerx.up:
-	@docker compose -f $(POWERX_COMPOSE_FILE) up -d
-
 # 停止所有服务
 .PHONY: down
 docker.down:
@@ -32,6 +29,3 @@ docker.base.down:
 
 docker.brainx.down:
 	@docker compose -f $(BRAINX_COMPOSE_FILE) down
-
-docker.powerx.down:
-	@docker compose -f $(POWERX_COMPOSE_FILE) down
