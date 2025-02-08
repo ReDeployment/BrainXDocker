@@ -30,6 +30,7 @@ include makefiles/redis.mk
 include makefiles/minio.mk
 include makefiles/loki.mk
 include makefiles/grafana.mk
+include makefiles/composer.mk
 include makefiles/export.mk
 # include makefiles/promtail.mk
 # 可以继续添加其他服务的 mk 文件
