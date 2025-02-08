@@ -21,7 +21,7 @@ docker.brainx.up:
 .PHONY: down
 docker.down:
 	@echo "Stopping all services..."
-	@docker compose -f $(BASE_COMPOSE_FILE) -f $(BRAINX_COMPOSE_FILE) -f $(POWERX_COMPOSE_FILE) down
+	@docker compose -f $(BASE_COMPOSE_FILE) down
 
 docker.base.down:
 	@echo "Starting base services..."
