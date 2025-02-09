@@ -10,7 +10,7 @@ endif
 
 
 # 使用 .env 中定义的数据库端口
-POSTGRES_PORT := $(DATABSE_PORT)
+POSTGRES_PORT := $(POSTGRES_PORT)
 
 POSTGRES_DATA_PATH := $(if $(POSTGRES_DATA_PATH),$(POSTGRES_DATA_PATH),$(PROJECT_DIR)/docker-data/postgres)
 ABS_POSTGRES_DATA_PATH := $(call get_absolute_path,$(POSTGRES_DATA_PATH))
@@ -38,7 +38,6 @@ run.postgres:
 		-e POSTGRES_USER=$(POSTGRES_USER) \
 		-e POSTGRES_PASSWORD=$(POSTGRES_PASSWORD) \
 		-e POSTGRES_DB=$(POSTGRES_DB) \
-		-v $(ABS_POSTGRES_DATA_PATH):/var/lib/postgresql/data \
 		$(POSTGRES_IMAGE_NAME):$(POSTGRES_VERSION)
 
 stop.postgres:
