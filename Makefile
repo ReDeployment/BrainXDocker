@@ -34,7 +34,9 @@ include makefiles/composer.mk
 include makefiles/export.mk
 # include makefiles/promtail.mk
 # 可以继续添加其他服务的 mk 文件
-include makefiles/brainx.mk
+include makefiles/brainx/backend-base.mk
+include makefiles/brainx/backend.mk
+# include makefiles/brainx/frontend.mk
 include makefiles/rabbitmq.mk
 
 # 总构建目标，依赖 PostgreSQL 和 Redis

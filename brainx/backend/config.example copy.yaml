@@ -1,0 +1,241 @@
+server:
+  version: "0.0.7"
+  region: "global"
+  project_name: "BrainX"
+  project_type: "standalone"
+  host: "0.0.0.0"
+  port: 8000
+  max_bytes: 10485760
+  cors_origins:
+    - "*"
+  worker_count: 2
+  environment: "local"
+  server_render: False
+  timezone: "Asia/Shanghai"
+
+jwt:
+  jwt_secret: "docker.prod"
+  expire_in: 15552000 # 3600*24*30*6
+
+api:
+  api_prefix: "/api"
+  openapi_prefix: "/openapi/v1"
+  request_timeout: 60
+  show_routes_list: False
+
+openapi:
+  platforms:
+    token_secret_key: "xxxxxxxxxxxxxxxxxxxx"
+    # 访问BrainX OpenAPI的restful 配置
+    power_x:
+      access_key: "key_power_x"
+      secret_key: "987654321"
+
+  providers:
+    # 访问PowerX OpenAPI的restful 配置
+    power_x:
+      base_url: "http://127.0.0.1:8888/openapi/v1"
+      access_key: "xxxxxxxxxxxx"
+      secret_key: "xxxxxxxxxxxx"
+
+database:
+  dsn: "postgresql+asyncpg://postgres:postgres@postgres:5432/brain_x" # 数据库连接字符串
+  db_schema: "brainx" # 默认的数据库 schema
+  pool_size: 4 # 最大连接数
+  max_overflow: 10 # 超过池大小的最大连接数
+  pool_timeout: 120 # 连接池获取连接的超时时间（秒）
+  pool_recycle: 3600 # 连接最大生命周期（秒）
+  pool_pre_ping: true # 连接池健康检查
+  poolclass: # "sqlalchemy.pool.NullPool"
+  echo: False
+
+cache:
+  driver: redis
+  redis:
+    url: redis://redis:6379/0
+    use_jsonb: True
+
+schedule:
+  enable: False
+  driver: apscheduler
+  job_stores:
+    default:
+      type: sqlalchemy # 或者 redis
+      url: postgresql://postgres:postgres@postgres:5432/brain_x
+      host: postgres
+      port: 6379
+      db: 0
+      username:
+      password:
+  executors:
+    default:
+      type: threadpool
+      max_workers: 3
+  job_defaults:
+    coalesce: false
+    max_instances: 1
+
+task:
+  enable: False
+  # celery_broker_url: 'amqp://guest:guest@localhost:5672//'
+  # celery_result_backend: 'db+postgresql://username:password@127.0.0.1:5432/brainx'
+  celery_broker_url: "redis://redis:6379/0"
+  celery_result_backend: "redis://redis:6379/0"
+  # 队列的配置
+  queue:
+    default:
+    rag_queue: rag_queue
+    task_queue: task_queue
+  task_acks_on_failure_or_timeout: True
+  task_time_limit: 3600 # 任务最大执行时间
+  task_soft_time_limit: 3000 # 软时间限制
+  task_acks_late: True # 任务完成后才确认
+  task_reject_on_worker_lost: True # worker 丢失时重新入队
+  task_default_rate_limit: "1/s" # 限制任务执行速率
+  task_default_retry_delay: 5 # 任务重试延迟时间，单位是秒
+  task_retry_count: 5 # 任务最大重试次数
+
+  # worker 配置
+  worker_concurrency: 4 # 并发 worker 数量
+  worker_prefetch_multiplier: 1 # 限制 worker 预取任务数
+
+  # broker 配置
+  broker_use_ssl: False
+  ssl_cert_reqs: ""
+  ssl_ca_certs: ""
+  ssl_cert_file: ""
+  ssl_keyfile: ""
+  broker_connection_retry_on_startup: True
+  broker_connection_timeout: 30
+  broker_heartbeat: 30
+
+  # 结果过期时间
+  result_expires: 3600
+  # result_backend_transport_options Socket 配置
+  socket_connect_timeout: 30
+  socket_timeout: 30
+
+event:
+  enable: False # 默认关闭，如果需要用得到订阅通知事件，可以开启
+  driver: rabbitMQ #驱动默认是RabbitMQ
+  host: localhost
+  port: 5672 # RabbitMQ默认端口
+  user: guest
+  password: guest
+  default_event_queue: queue_brainx #事件队列名称
+  queues:
+    []
+    # - name: queue_name #事件名
+    #   event_name: event_name
+
+models:
+  qa_embedding_model_name: "shibing624/text2vec-base-chinese"
+  visual_search_model_name: "clip-ViT-L-14"
+  visual_query_model_name: "dandelin/vilt-b32-finetuned-vqa"
+
+agent:
+  framework_driver: langchain
+  vdb: pgvector
+  vector_store_table_name: "langchain_pg_embedding"
+  vector_store_collection: "rag_embeddings"
+  router_llm: gpt-3.5-turbo
+  pgvector:
+    # 默认使用postgres，和database用的dsn一致，除非你需要自己定义自己另外地址的pgvector地址
+    url: "postgresql+psycopg://username:password@127.0.0.1:5432/brain_x"
+    use_jsonb: True
+
+log:
+  file: true # 是否输出到本地文件
+  console: true # 是否输出到控制台
+  path: ./logs
+  split:
+    - error
+  level: info
+  interval: 1 # 间隔1天（与 "midnight" 配合使用时，interval 设为 1）
+  keep_days: 30 # 保留最近n天的日志文件
+  stat: false
+  exc_info: true
+  extra:
+    elasticsearch:
+      enable: false # 是否使用Elasticsearch
+      hosts:
+        - "http://localhost:9200"
+      username: "kibana_user"
+      password: "your_password"
+      index_name: "brain_x_log" # Elasticsearch索引名称
+    loki:
+      enable: false
+      url: "http://localhost:3100/loki/api/v1/push" # Loki 的推送地址
+
+test:
+  db_url: "postgresql+psycopg2://username:password@localhost/test_db"
+
+openai:
+  llm_name: "gpt-3.5-turbo"
+  api_base: "https://api.openai.com/v1/"
+  api_key: "YOUR_API_KEY"
+  request_timeout: 30
+
+kimi:
+  llm_name: "moonshot-v1-8k"
+  api_base: "https://api.moonshot.cn/v1"
+  api_key: "sk-reAhVwEXS8KkfazfbgAqDYbOrI9jQtFhCsDtQJA3Gq0Exxxx"
+  request_timeout: 30
+
+baidu_qianfan:
+  api_key: "YOUR_API_KEY"
+  secret_key: "YOUR_SECRET_KEY"
+  request_timeout: 30
+
+tencent_hunyuan:
+  api_base: "https://api.hunyuan.cloud.tencent.com/v1"
+  api_key: sk-ADKNWJj4VLqaazEgPDRaIwWHWkY05XFnmdw91rxxxxxx
+  request_timeout: 30
+
+ollama:
+  url: "http://localhost:11434"
+
+coze:
+  api_base: https://api.coze.cn/v3
+  api_key: "YOUR_API_KEY"
+  bot_id: "bot_id"
+  user_id: "brainx"
+  conversation_id: ""
+
+polygon:
+  api_key: "YOUR_API_KEY"
+
+sentry:
+  dsn: "YOUR_DSN"
+  environment: "local"
+  release: "1.0"
+
+storage:
+  driver: "local"
+  host: "127.0.0.1:8000"
+  local_storage:
+    storage_path: "./storage"
+  minio:
+    endpoint: "127.0.0.1:9001"
+    access_key: "YOUR_ACCESS_KEY"
+    secret_key: "YOUR_SECRET_KEY"
+    use_ssl: True
+    region: "AsiaShanghai"
+    bucket_name: "bucket.brainx"
+  aliyun:
+    endpoint: "oss-cn-beijing.aliyuncs.com"
+    access_key: "YOUR_ACCESS_KEY"
+    secret_key: "YOUR_SECRET_KEY"
+    bucket_name: "BUCKET_NAME"
+  azure:
+    account_name: "ACCOUNT_NAME"
+    account_key: "ACCOUNT_KEY"
+    container_name: "CONTAINER_NAME"
+    bucket_name: "BUCKET_NAME"
+  google:
+    bucket_name: "BUCKET_NAME"
+  s3:
+    endpoint: "ENDPOINT"
+    access_key: "ACCESS_KEY"
+    secret_key: "SECRET_KEY"
+    bucket_name: "BUCKET_NAME"
