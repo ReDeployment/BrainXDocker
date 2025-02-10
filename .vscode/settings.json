@@ -8,5 +8,9 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "marscode.codeCompletionPro": {
+    "enableCodeCompletionPro": true
+  },
+  "marscode.enableInlineCommand": true
 }

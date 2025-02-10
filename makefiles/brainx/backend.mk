@@ -2,6 +2,9 @@
 
 # 定义变量
 BRAINX_BACKEND_IMAGE_NAME := brainx-backend
+BRAINX_BACKEND_TASK_NAME := brainx-task
+BRAINX_BACKEND_TASK_RAG_NAME := brainx-task-rag
+
 BRAINX_BACKEND_DOCKERFILE := ${BRAINX_BACKEND_DOCKERFILE}
 BRAINX_BACKEND_VERSION := $(shell cat .env | grep DOCKER_IMAGE_BRAINX_BACKEND_VERSION | cut -d '=' -f2)
 ifeq ($(BRAINX_BACKEND_VERSION),)
@@ -9,7 +12,7 @@ ifeq ($(BRAINX_BACKEND_VERSION),)
 endif
 
 # 使用 .env 中定义的端口
-BRAINX_BACKEND_PORT := $(BRAINX_BACKEND_PORT)
+BRAINX_PORT := $(BRAINX_BACKEND_PORT)
 
 
 ABS_BRAINX_BACKEND_DIR:= $(call get_absolute_path,$(BRAINX_BACKEND_DIR))
@@ -45,7 +48,27 @@ run.brainx.backend:
 		-v ${ABS_BRAINX_CACHE_FOLDER}:/root/.cache \
 		-v ${ABS_BRAINX_MODEL_FOLDER}:/root/brainx/model \
 		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
-		make -f /app/Makefile -C /app app-init
+		make -f /app/docker/Makefile-py.mk -C /app app-init
+
+run.brainx.backend.build:
+	docker run -d \
+		--name $(BRAINX_BACKEND_IMAGE_NAME) \
+		-p $(BRAINX_PORT):8000 \
+		-v ${ABS_BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc \
+		-v ${ABS_BRAINX_BACKEND_LOG_PATH}:/app/logs \
+		-v ${ABS_BRAINX_CACHE_FOLDER}:/root/.cache \
+		-v ${ABS_BRAINX_MODEL_FOLDER}:/root/brainx/model \
+		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
+		make -f /app/docker/Makefile-build.mk -C /app app-init
+
+
+run.brainx.task:
+	docker run -d \
+		--name $(BRAINX_BACKEND_TASK_RAG_NAME) \
+		-v ${ABS_BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc \
+		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
+		make -f /app/docker/Makefile-py.mk -C /app app-init
+
 
 # 停止日志容器
 stop.brainx.backend:
