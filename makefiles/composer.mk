@@ -5,8 +5,8 @@ BASE_COMPOSE_FILE = docker-compose.base.yaml
 BRAINX_COMPOSE_FILE = docker-compose.brainx.yaml
 
 # 默认目标是启动所有服务
-.PHONY: docker.all
-docker.all:
+.PHONY: docker.all.up
+docker.all.up:
 	@echo "Starting all services..."
 	@docker compose -f $(BASE_COMPOSE_FILE) -f $(BRAINX_COMPOSE_FILE) up -d
 
@@ -19,7 +19,7 @@ docker.brainx.up:
 
 # 停止所有服务
 .PHONY: down
-docker.down:
+docker.all.down:
 	@echo "Stopping all services..."
 	@docker compose -f $(BASE_COMPOSE_FILE) down
 

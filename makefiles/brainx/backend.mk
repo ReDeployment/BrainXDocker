@@ -38,7 +38,7 @@ ABS_BRAINX_MODEL_FOLDER := $(call get_absolute_path,$(BRAINX_MODEL_FOLDER))
 
 rerun.brainx.backend: stop.brainx.backend run.brainx.backend
 
-# 运行日志容器
+# 运行后台服务容器
 run.brainx.backend:
 	docker run -d \
 		--name $(BRAINX_BACKEND_IMAGE_NAME) \
@@ -61,21 +61,44 @@ run.brainx.backend.build:
 		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
 		make -f /app/docker/Makefile-build.mk -C /app app-init
 
-
+# 运行后台任务服务容器
 run.brainx.task:
 	docker run -d \
 		--name $(BRAINX_BACKEND_TASK_RAG_NAME) \
 		-v ${ABS_BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc \
 		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
-		make -f /app/docker/Makefile-py.mk -C /app app-init
+		make -f /app/docker/Makefile-py.mk -C /app task-run
+
+run.brainx.task.build:
+	docker run -d \
+		--name $(BRAINX_BACKEND_TASK_NAME) \
+		-v ${ABS_BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc \
+		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
+		make -f /app/docker/Makefile-build.mk -C /app task-run
+
+# 运行后台RAG任务服务容器
+run.brainx.task.rag:
+	docker run -d \
+		--name $(BRAINX_BACKEND_TASK_RAG_NAME) \
+		-v ${ABS_BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc \
+		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
+		make -f /app/docker/Makefile-py.mk -C /app task-rag-run
+
+run.brainx.task.rag.build:
+	docker run -d \
+		--name $(BRAINX_BACKEND_TASK_RAG_NAME) \
+		-v ${ABS_BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc \
+		$(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION) \
+		make -f /app/docker/Makefile-build.mk -C /app task-rag-run
 
 
-# 停止日志容器
+
+# 停止后台容器
 stop.brainx.backend:
 	docker stop $(BRAINX_BACKEND_IMAGE_NAME)
 	docker rm $(BRAINX_BACKEND_IMAGE_NAME)
 
-# 清理日志镜像
+# 清理后台镜像
 clean.brainx.backend:
 	docker rmi $(BRAINX_BACKEND_IMAGE_NAME):$(BRAINX_BACKEND_VERSION)
 	@echo "Cleaned up brainx image."

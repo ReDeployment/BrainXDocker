@@ -15,6 +15,73 @@ services:
     networks:
       - networkX
 
+  # 定义共享配置的锚点
+  backend-base: &backend-base
+    container_name: brainx-backend-base
+    image: brainx-backend:${DOCKER_IMAGE_VERSION}
+    volumes:
+      - ./docker-data/brainx/backend/storage/public/static:/app/storage/public/static
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      - networkX
+
+  # Backend 服务
+  backend:
+    <<: *backend-base
+    container_name: brainx-backend
+    volumes:
+      - ${BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc
+      - ${BRAINX_BACKEND_LOG_PATH}:/app/logs
+      - ${BRAINX_BACKEND_CACHE_FOLDER}=./docker-data/brainx/backend/cache}:/root/.cache
+      - ${BRAINX_BACKEND_MODEL_FOLDER}=./docker-data/brainx/backend/model}:/root/brainx/model
+    ports:
+      - "${BRAINX_BACKEND_PORT}:8000" # FastAPI 映射到主机端口
+    # command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command:
+      ["make", "-f", "/app/docker/Makefile-build.mk", "-C", "/app", "app-init"]
+      # ["make", "-f", "/app/docker/Makefile-py.mk", "-C", "/app", "app-init"]
+
+    networks:
+      - networkX
+
+  # Celery worker for another queue (e.g., default queue)
+  task:
+    <<: *backend-base
+    container_name: brainx-task
+    volumes:
+      - ${BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc
+      - ${BRAINX_BACKEND_LOG_PATH}:/app/logs
+    command: [
+        "./dist/task/task",
+        "-A app.service.task.celery_worker",
+        "worker",
+        "--loglevel=info",
+        # "-n brainx@worker",
+        "-P gevent",
+      ]
+    ports: []
+    networks:
+      - networkX
+
+  task-rag:
+    <<: *backend-base
+    container_name: brainx-task-rag
+    volumes:
+      - ${BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc
+      - ${BRAINX_BACKEND_LOG_PATH}:/app/logs
+    command: [
+        "./dist/task/task",
+        "-A app.service.task.celery_worker",
+        "worker",
+        "-Q rag_queue",
+        "--loglevel=info",
+        # "-n brainx@worker_rag",
+        "-P gevent",
+      ]
+    ports: []
+    networks:
+      - networkX
+
 networks:
   networkX: # 定义正确的网络
     driver: bridge # 网络驱动器
