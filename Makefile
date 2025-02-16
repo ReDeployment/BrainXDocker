@@ -54,7 +54,7 @@ include makefiles/export.mk
 include makefiles/brainx/brainx.mk
 
 # 总构建目标，依赖 PostgreSQL 和 Redis
-build: build.postgres build.redis build.minio build.grafana build.loki
+build.base: build.postgres build.redis build.minio build.grafana build.loki
 	@echo "Build complete."
 
 # 运行所有服务
