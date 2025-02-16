@@ -36,8 +36,6 @@ services:
     environment:
       MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
-      MINIO_ACCESS_KEY: "${MINIO_ACCESS_KEY}"
-      MINIO_SECRET_KEY: "${MINIO_SECRET_KEY}"
     ports:
       - "${MINIO_API_PORT}:9000" # MinIO 控制台端口
       - "${MINIO_CONSOLE_PORT}:9001" # MinIO 客户端端口
@@ -48,17 +46,7 @@ services:
     networks:
       - networkX
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mc",
-          "alias",
-          "set",
-          "myminio",
-          "http://localhost:9000",
-          "${MINIO_ACCESS_KEY}",
-          "${MINIO_SECRET_KEY}",
-        ]
+      test: ["CMD", "mc", "alias", "set", "myminio", "http://localhost:9000"]
       interval: 5s
       retries: 5
 
