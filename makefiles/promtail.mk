@@ -3,7 +3,7 @@
 # 定义变量
 PROMTAIL_IMAGE_NAME := x-promtail
 PROMTAIL_DOCKERFILE_DIR := ./images/promtail
-PROMTAIL_VERSION := $(shell cat .env | grep DOCKER_IMAGE_PROMTAIL_VERSION | cut -d '=' -f2)
+# PROMTAIL_VERSION := $(shell cat .env | grep DOCKER_IMAGE_PROMTAIL_VERSION | cut -d '=' -f2)
 ifeq ($(PROMTAIL_VERSION),)
   PROMTAIL_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

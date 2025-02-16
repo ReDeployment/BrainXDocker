@@ -1,12 +1,29 @@
 # 主 Makefile
 
-PROJECT_DIR := $(shell pwd)
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Linux)
+    OS := Linux
+else ifeq ($(UNAME_S), Darwin)
+    OS := MacOS
+else ifeq ($(OS), Windows_NT)
+    OS := Windows
+endif
+export OS
+
+ifeq  ($(OS),Windows) 
+	PROJECT_DIR := $(shell powershell -Command "echo $(shell cd)")
+else
+	PROJECT_DIR := $(shell pwd)
+endif
 
 # 通过 shell 命令手动加载环境变量
 ifneq ($(wildcard .env),)
   include .env
   export
 endif
+
+
 
 # 设置默认目标
 .DEFAULT_GOAL := build
@@ -34,10 +51,7 @@ include makefiles/composer.mk
 include makefiles/export.mk
 # include makefiles/promtail.mk
 # 可以继续添加其他服务的 mk 文件
-include makefiles/brainx/backend-base.mk
-include makefiles/brainx/backend.mk
-# include makefiles/brainx/frontend.mk
-include makefiles/rabbitmq.mk
+include makefiles/brainx/brainx.mk
 
 # 总构建目标，依赖 PostgreSQL 和 Redis
 build: build.postgres build.redis build.minio build.grafana build.loki

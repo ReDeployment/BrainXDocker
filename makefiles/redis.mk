@@ -3,7 +3,7 @@
 # 定义 Redis 镜像名称和版本
 REDIS_IMAGE_NAME := x-redis
 REDIS_DOCKERFILE_DIR := ./images/redis
-REDIS_VERSION := $(shell cat .env | grep DOCKER_IMAGE_REDIS_VERSION | cut -d '=' -f2)
+# REDIS_VERSION := $(shell cat .env | grep DOCKER_IMAGE_REDIS_VERSION | cut -d '=' -f2)
 ifeq ($(REDIS_VERSION),)
   REDIS_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

@@ -2,7 +2,7 @@
 
 # 定义变量
 BRAINX_IMAGE_NAME := brainx-backend
-BRAINX_VERSION := $(shell cat .env | grep DOCKER_IMAGE_BRAINX_VERSION | cut -d '=' -f2)
+# BRAINX_VERSION := $(shell cat .env | grep DOCKER_IMAGE_BRAINX_VERSION | cut -d '=' -f2)
 ifeq ($(BRAINX_VERSION),)
 	BRAINX_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

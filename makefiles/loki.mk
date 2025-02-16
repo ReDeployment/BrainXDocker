@@ -3,7 +3,7 @@
 # 定义变量
 LOKI_IMAGE_NAME := x-loki
 LOKI_DOCKERFILE_DIR := ./images/loki
-LOKI_VERSION := $(shell cat .env | grep DOCKER_IMAGE_LOKI_VERSION | cut -d '=' -f2)
+# LOKI_VERSION := $(shell cat .env | grep DOCKER_IMAGE_LOKI_VERSION | cut -d '=' -f2)
 ifeq ($(LOKI_VERSION),)
   LOKI_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

@@ -3,7 +3,7 @@
 # 定义变量
 MINIO_IMAGE_NAME := x-minio
 MINIO_DOCKERFILE_DIR := ./images/minio
-MINIO_VERSION := $(shell cat .env | grep DOCKER_IMAGE_MINIO_VERSION | cut -d '=' -f2)
+# MINIO_VERSION := $(shell cat .env | grep DOCKER_IMAGE_MINIO_VERSION | cut -d '=' -f2)
 ifeq ($(MINIO_VERSION),)
   MINIO_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

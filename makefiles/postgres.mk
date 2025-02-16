@@ -3,7 +3,7 @@
 # 定义 PostgreSQL 镜像名称和版本
 POSTGRES_IMAGE_NAME := x-postgres
 POSTGRES_DOCKERFILE_DIR := ./images/postgres
-POSTGRES_VERSION := $(shell cat .env | grep DOCKER_IMAGE_POSTGRES_VERSION | cut -d '=' -f2)
+# POSTGRES_VERSION := $(shell cat .env | grep DOCKER_IMAGE_POSTGRES_VERSION | cut -d '=' -f2)
 ifeq ($(POSTGRES_VERSION),)
   POSTGRES_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

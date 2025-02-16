@@ -3,7 +3,7 @@
 # 定义变量
 GRAFANA_IMAGE_NAME := x-grafana
 GRAFANA_DOCKERFILE_DIR := ./images/grafana
-GRAFANA_VERSION := $(shell cat .env | grep DOCKER_IMAGE_GRAFANA_VERSION | cut -d '=' -f2)
+# GRAFANA_VERSION := $(shell cat .env | grep DOCKER_IMAGE_GRAFANA_VERSION | cut -d '=' -f2)
 ifeq ($(GRAFANA_VERSION),)
   GRAFANA_VERSION := $(DOCKER_IMAGE_VERSION)  # 如果没有从 .env 获取到版本号，默认使用 DOCKER_IMAGE_VERSION
 endif

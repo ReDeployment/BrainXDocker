@@ -1,19 +1,28 @@
 # makefiles/utils.mk:
 
-# 通用函数，用于根据相对路径或绝对路径生成绝对路径
-# 定义 DOCKER_DATA_PATH
-DOCKER_DATA_PATH = /docker-data
-
-# 改进的 get_absolute_path 函数
-get_absolute_path = $(strip \
-    $(if $(filter /%,$(1)), \
-        $(1), \
-        $(if $(filter ./%,$(1)), \
-            $(PROJECT_DIR)/$(patsubst ./%,%,$(1)), \
-            $(PROJECT_DIR)/$(1) \
+ifeq  ($(OS),Windows) 
+    get_absolute_path = $(strip \
+        $(if $(filter /%,$(1)), \
+            $(1), \
+            $(if $(filter ./%,$(1)), \
+                $(PROJECT_DIR)/$(patsubst ./%,%,$(1)), \
+                $(PROJECT_DIR)/$(1) \
+            ) \
         ) \
-    ) \
-)
+    )
+else
+    # 改进的 get_absolute_path 函数
+    get_absolute_path = $(strip \
+        $(if $(filter /%,$(1)), \
+            $(1), \
+            $(if $(filter ./%,$(1)), \
+                $(PROJECT_DIR)/$(patsubst ./%,%,$(1)), \
+                $(PROJECT_DIR)/$(1) \
+            ) \
+        ) \
+    )
+endif
+
 
 # 测试用例
 test.get_absolute_path:

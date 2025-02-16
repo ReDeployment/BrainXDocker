@@ -19,13 +19,12 @@ docker.brainx.up:
 
 # 停止所有服务
 .PHONY: down
-docker.all.down:
-	@echo "Stopping all services..."
-	@docker compose -f $(BASE_COMPOSE_FILE) down
+docker.all.down: docker.base.down docker.brainx.down
 
 docker.base.down:
-	@echo "Starting base services..."
+	@echo "Stopping base services..."
 	@docker compose -f $(BASE_COMPOSE_FILE) down
 
 docker.brainx.down:
+	@echo "Stopping brainx services..."
 	@docker compose -f $(BRAINX_COMPOSE_FILE) down

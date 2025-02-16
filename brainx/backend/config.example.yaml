@@ -77,8 +77,8 @@ schedule:
 
 task:
   enable: False
-  # celery_broker_url: 'amqp://guest:guest@localhost:5672//'
-  # celery_result_backend: 'db+postgresql://username:password@127.0.0.1:5432/brainx'
+  # celery_broker_url: 'amqp://guest:guest@rabbitmq:5672/default'
+  # celery_result_backend: 'db+postgresql://postgres:postgres@postgres:5432/brainx'
   celery_broker_url: "redis://redis:6379/0"
   celery_result_backend: "redis://redis:6379/0"
   # 队列的配置
@@ -129,9 +129,9 @@ event:
     #   event_name: event_name
 
 models:
-  qa_embedding_model_name: "shibing624/text2vec-base-chinese"
-  visual_search_model_name: "clip-ViT-L-14"
-  visual_query_model_name: "dandelin/vilt-b32-finetuned-vqa"
+  qa_embedding_model_name: "/root/.cache/torch/sentence_transformers/shibing624_text2vec-base-chinese"
+  visual_search_model_name: "/root/.cache/huggingface/hub/models--laion--CLIP-ViT-bigG-14-laion2B-39B-b160k"
+  visual_query_model_name: "/root/.cache/huggingface/hub/models--dandelin--vilt-b32-finetuned-vqa"
 
 agent:
   framework_driver: langchain
@@ -193,7 +193,8 @@ tencent_hunyuan:
   request_timeout: 30
 
 ollama:
-  url: "http://localhost:11434"
+  # url: "http://localhost:11434"
+  url: "http://host.docker.internal:11434"
 
 coze:
   api_base: https://api.coze.cn/v3
