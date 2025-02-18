@@ -210,6 +210,7 @@ sentry:
   dsn: "YOUR_DSN"
   environment: "local"
   release: "1.0"
+  sample_rate: 0.1
 
 storage:
   driver: "minio"
