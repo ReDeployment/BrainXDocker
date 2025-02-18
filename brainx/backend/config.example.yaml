@@ -34,7 +34,7 @@ openapi:
   providers:
     # 访问PowerX OpenAPI的restful 配置
     power_x:
-      base_url: "http://127.0.0.1:8888/openapi/v1"
+      base_url: "http://powerx:8888/openapi/v1"
       access_key: "xxxxxxxxxxxx"
       secret_key: "xxxxxxxxxxxx"
 
@@ -141,7 +141,7 @@ agent:
   router_llm: gpt-3.5-turbo
   pgvector:
     # 默认使用postgres，和database用的dsn一致，除非你需要自己定义自己另外地址的pgvector地址
-    url: "postgresql+psycopg://username:password@127.0.0.1:5432/brain_x"
+    url: "postgresql+psycopg://postgres:postgres@postgres:5432/brain_x"
     use_jsonb: True
 
 log:
@@ -213,11 +213,11 @@ sentry:
 
 storage:
   driver: "minio"
-  host: "127.0.0.1:8000"
+  host: "minio:9000"
   local_storage:
     storage_path: "./storage"
   minio:
-    endpoint: "127.0.0.1:9100"
+    endpoint: "minio:9000"
     access_key: "YOUR_ACCESS_KEY"
     secret_key: "YOUR_SECRET_KEY"
     use_ssl: True
