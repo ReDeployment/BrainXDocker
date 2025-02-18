@@ -96,7 +96,7 @@ task:
   task_retry_count: 5 # 任务最大重试次数
 
   # worker 配置
-  worker_concurrency: 4 # 并发 worker 数量
+  worker_concurrency: 1 # 并发 worker 数量
   worker_prefetch_multiplier: 1 # 限制 worker 预取任务数
 
   # broker 配置
