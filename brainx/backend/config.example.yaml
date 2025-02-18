@@ -77,10 +77,10 @@ schedule:
 
 task:
   enable: False
-  # celery_broker_url: 'amqp://guest:guest@rabbitmq:5672/default'
-  # celery_result_backend: 'db+postgresql://postgres:postgres@postgres:5432/brainx'
-  celery_broker_url: "redis://redis:6379/0"
-  celery_result_backend: "redis://redis:6379/0"
+  celery_broker_url: "amqp://guest:guest@rabbitmq:5672/default"
+  celery_result_backend: "db+postgresql://postgres:postgres@postgres:5432/brain_x"
+  # celery_broker_url: "redis://redis:6379/0"
+  # celery_result_backend: "redis://redis:6379/0"
   # 队列的配置
   queue:
     default:
