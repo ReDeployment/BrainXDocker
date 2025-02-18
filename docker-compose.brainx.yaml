@@ -16,7 +16,7 @@ services:
       - networkX
 
   # 定义共享配置的锚点
-  backend-base: &backend-base
+  brainx-backend-base: &brainx-backend-base
     container_name: brainx-backend-base
     image: brainx-backend:${DOCKER_IMAGE_VERSION}
     volumes:
@@ -26,8 +26,8 @@ services:
       - networkX
 
   # Backend 服务
-  backend:
-    <<: *backend-base
+  brainx-backend:
+    <<: *brainx-backend-base
     container_name: brainx-backend
     volumes:
       - ${BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc
@@ -45,8 +45,8 @@ services:
       - networkX
 
   # Celery worker for another queue (e.g., default queue)
-  task:
-    <<: *backend-base
+  brainx-task:
+    <<: *brainx-backend-base
     container_name: brainx-task
     volumes:
       - ${BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc
@@ -68,8 +68,8 @@ services:
     networks:
       - networkX
 
-  task-rag:
-    <<: *backend-base
+  brainx-task-rag:
+    <<: *brainx-backend-base
     container_name: brainx-task-rag
     volumes:
       - ${BRAINX_BACKEND_CONFIG_FOLDER}:/app/etc
@@ -93,7 +93,7 @@ services:
     networks:
       - networkX
 
-  frontend:
+  brainx-frontend:
     container_name: brainx-frontend
     image: brainx-frontend:${DOCKER_IMAGE_VERSION}
     networks:
