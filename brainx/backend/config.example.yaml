@@ -10,7 +10,7 @@ server:
     - "*"
   worker_count: 2
   environment: "local"
-  server_render: False
+  server_render: True
   timezone: "Asia/Shanghai"
 
 jwt:
