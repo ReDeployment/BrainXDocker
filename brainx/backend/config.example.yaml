@@ -118,7 +118,7 @@ task:
 event:
   enable: False # 默认关闭，如果需要用得到订阅通知事件，可以开启
   driver: rabbitMQ #驱动默认是RabbitMQ
-  host: localhost
+  host: rabbitmq
   port: 5672 # RabbitMQ默认端口
   user: guest
   password: guest
@@ -159,16 +159,16 @@ log:
     elasticsearch:
       enable: false # 是否使用Elasticsearch
       hosts:
-        - "http://localhost:9200"
+        - "http://elasticsearch:9200"
       username: "kibana_user"
       password: "your_password"
       index_name: "brain_x_log" # Elasticsearch索引名称
     loki:
       enable: false
-      url: "http://localhost:3100/loki/api/v1/push" # Loki 的推送地址
+      url: "http://liki:3100/loki/api/v1/push" # Loki 的推送地址
 
 test:
-  db_url: "postgresql+psycopg2://username:password@localhost/test_db"
+  db_url: "postgresql+psycopg2://postgres:postgres@postgres/test_db"
 
 openai:
   llm_name: "gpt-3.5-turbo"
@@ -193,7 +193,7 @@ tencent_hunyuan:
   request_timeout: 30
 
 ollama:
-  # url: "http://localhost:11434"
+  # url: "http://ollama:11434"
   url: "http://host.docker.internal:11434"
 
 coze:
