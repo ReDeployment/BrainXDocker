@@ -165,7 +165,7 @@ log:
       index_name: "brain_x_log" # Elasticsearch索引名称
     loki:
       enable: true
-      url: "http://liki:3100/loki/api/v1/push" # Loki 的推送地址
+      url: "http://loki:3100/loki/api/v1/push" # Loki 的推送地址
 
 test:
   db_url: "postgresql+psycopg2://postgres:postgres@postgres/test_db"
