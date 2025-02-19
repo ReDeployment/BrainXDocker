@@ -164,7 +164,7 @@ log:
       password: "your_password"
       index_name: "brain_x_log" # Elasticsearch索引名称
     loki:
-      enable: false
+      enable: true
       url: "http://liki:3100/loki/api/v1/push" # Loki 的推送地址
 
 test:
