@@ -25,12 +25,12 @@ docker.base.down:
 	@echo "Stopping base services..."
 	@docker compose -f $(BASE_COMPOSE_FILE) down
 
+docker.base.config:
+	@docker compose -f $(BASE_COMPOSE_FILE) config
+
 docker.brainx.down:
 	@echo "Stopping brainx services..."
 	@docker compose -f $(BRAINX_COMPOSE_FILE) down
-
-docker.base.config:
-	@docker compose -f $(BASE_COMPOSE_FILE) config
 
 docker.brainx.config:
 	@docker compose -f $(BRAINX_COMPOSE_FILE) config
