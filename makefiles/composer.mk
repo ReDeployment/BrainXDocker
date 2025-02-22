@@ -22,3 +22,6 @@ docker.down:
 docker.base.down:
 	@echo "Starting base services..."
 	@docker compose -f $(BASE_COMPOSE_FILE) down
+
+docker.base.config:
+	@docker compose -f $(BASE_COMPOSE_FILE) config
